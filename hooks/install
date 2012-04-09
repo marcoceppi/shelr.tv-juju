@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Setup the environment
+apt-get update
+apt-get upgrade
+apt-get install -y openjdk-6-jre libxml2-dev libxslt1-dev ruby1.9.1-full ruby-bundler
+CDIR=`pwd`
+
+if [ ! -d /var/www/shelr ]; then
+	git clone https://github.com/antono/shelr.tv.git /var/www/shelr
+	cd /var/www/shelr
+else
+	cd /var/www/shelr
+	git pull
+fi
+
+bundle install
