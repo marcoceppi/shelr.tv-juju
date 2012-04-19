@@ -1,1 +1,9 @@
 #!/bin/bash
+
+if [ -f ".installed" ]; then
+	juju-log "Starting Shelr.tv"
+	# If Shelr isn't running then a restart will just report "Unknown instance"
+	# so explicitly stop, then start
+	service shelr.tv stop
+	service shelr.tv start
+fi

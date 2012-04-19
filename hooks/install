@@ -1,17 +1,40 @@
 #!/bin/bash
 
 # Setup the environment
+
+juju-log "Perform the update"
 apt-get update
-apt-get upgrade
-apt-get install -y openjdk-6-jre libxml2-dev libxslt1-dev ruby1.9.1-full ruby-bundler
+
 CDIR=`pwd`
 
-if [ ! -d /var/www/shelr ]; then
+if [ ! -d /var/www/shelr/.git ]; then
+	juju-log "This is our first install!"
+	add-apt-repository ppa:chris-lea/node.js
+	apt-get update
+	apt-get install -y make build-essential openjdk-6-jre libxml2-dev libxslt1-dev ruby1.9.1-full ruby-bundler git-core nodejs npm
+	
+	juju-log "Cloning latest shelr.tv"
 	git clone https://github.com/antono/shelr.tv.git /var/www/shelr
 	cd /var/www/shelr
 else
+	juju-log "Running an upgrade!"
+	apt-get update
+	apt-get upgrade -y
+	
 	cd /var/www/shelr
+	juju-log "Pulling the latest code"
 	git pull
 fi
 
-bundle install
+juju-log "Installing latest shelr.tv upstart script"
+install -o root -g root -m 0755 $CDIR/etc/shelr.tv /etc/init/shelr.tv.conf
+
+juju-log "Lets run everything on port 80"
+sed -i -e "s/web\: rails server*/web\: rails server --port 80/" Procfile
+
+juju-log "Make sure we use the latest version of ruby by default"
+update-alternatives --set ruby /usr/bin/ruby1.9.1
+update-alternatives --set gem /usr/bin/gem1.9.1
+
+juju-log "Cut the bundler on!"
+LANG=en_US.UTF-8 bundle install

@@ -1,0 +1,29 @@
+options:
+  god:
+    type: string
+    default: ""
+    description: Defines which User ID is an Admin
+  github-id:
+    type: string
+    default: ""
+    description: Github Application ID (Login-related)
+  github-secret:
+    type: string
+    default: ""
+    description: Github Secret key for API (Login-related)
+  google-id:
+    type: string
+    default: ""
+    description: Google Application ID (Login-related)
+  google-secret:
+    type: string
+    default: ""
+    description: Google Secret key for API (Login-related)
+  twitter-id:
+    type: string
+    default: ""
+    description: Twitter Application ID (Login-related)
+  twitter-secret:
+    type: string
+    default: ""
+    description: Twitter Secret key for API (Login-related)

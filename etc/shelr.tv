@@ -1,0 +1,11 @@
+# Shelr.tv upstart
+# this script will start/stop Shelr.tv
+description "Shelr.tv Server"
+version "1.0"
+author "Marco Ceppi"
+
+env HOME="/home/ubuntu"
+env LOG="/var/log/shelr.tv.log"
+
+chdir /var/www/shelr
+exec bundle exec foreman start >> $LOG 2>&1

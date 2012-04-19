@@ -1,0 +1,35 @@
+#!/bin/bash
+
+juju-log "Check if we have a database"
+DB_PORT=`relation-get hostname`
+
+# Determine if the relationship has been set yet
+if [ -z "$DB_PORT" ] ; then
+	juju-log "We don't have a database yet"
+	exit 0
+else
+	juju-log "We have a database!"
+fi
+
+DB_HOST=`relation-get private-address`
+DATABASE="shelr"
+
+juju-log "Generating mongoid configuration file"
+cat > /var/www/shelr/config/mongoid.yml <<EOD
+development:
+  host: $DB_HOST
+  database: $DATABASE
+EOD
+
+touch .installed
+
+# git will freak out because we changed mongoid.yml file, screw you git I'll do what I want!
+juju-log "Assume mongoid is unchanged"
+cd /var/www/shelr
+git update-index --assume-unchanged config/mongoid.yml
+
+# Lastly, make port 80 available
+juju-log "Opening port 80"
+open-port 80/tcp
+
+service shelr.tv start

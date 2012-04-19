@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -ux
+
+SECRET_FILE="/var/lib/juju/shelr.secret"
+
+if [ ! -f "$SECRET_FILE" ]; then
+	head /dev/urandom | md5sum | cut -d' ' -f1 > $SECRET_FILE
+fi
+
+SECRET=`cat $SECRET_FILE`
+
+GITHUB_ID=`config-get github-id`
+GITHUB_SECRET=`config-get github-secret`
+GOOGLE_ID=`config-get google-id`
+GOOGLE_SECRET=`config-get google-id`
+TWITTER_ID=`config-get twitter-id`
+TWITTER_SECRET=`config-get twitter-secret`
+
+cat > /var/www/shelr/config/config.yml <<EOF
+secret_token: $SECRET
+github:
+  id: $GITHUB_ID
+  secret: $GITHUB_SECRET
+google:
+  id: $GOOGLE_ID
+  secret: $GOOGLE_SECRET
+twitter:
+  id: $TWITTER_ID
+  secret: $TWITTER_SECRET
+EOF
+
+if [ -f ".installed" ]; then
+	juju-log "Restarting Shelr.tv"
+	# If Shelr isn't running then a restart will just report "Unknown instance"
+	# so explicitly stop, then start
+	service shelr.tv stop
+	service shelr.tv start
+fi
