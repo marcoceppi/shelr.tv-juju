@@ -5,6 +5,7 @@ set -ux
 SECRET_FILE="/var/lib/juju/shelr.secret"
 
 if [ ! -f "$SECRET_FILE" ]; then
+	juju-log "Creating a secret"
 	head /dev/urandom | md5sum | cut -d' ' -f1 > $SECRET_FILE
 fi
 
@@ -13,9 +14,21 @@ SECRET=`cat $SECRET_FILE`
 GITHUB_ID=`config-get github-id`
 GITHUB_SECRET=`config-get github-secret`
 GOOGLE_ID=`config-get google-id`
-GOOGLE_SECRET=`config-get google-id`
+GOOGLE_SECRET=`config-get google-secret`
 TWITTER_ID=`config-get twitter-id`
 TWITTER_SECRET=`config-get twitter-secret`
+GOD=`config-get god`
+
+if [ -n "$GOD" ]; then
+	juju-log "Making $GOD a GOD"
+	cd /var/www/shelr
+
+	HOME=/home/ubuntu bundle exec rails runner "u = User.find('$GOD'); u.god = true; u.save; if u.god? then exit(0) else exit(1) end"
+	if [ $? -ne 0 ]; then
+		juju-log "Couldn't set up god."
+		exit 1
+	fi
+fi
 
 cat > /var/www/shelr/config/config.yml <<EOF
 secret_token: $SECRET
@@ -30,6 +43,8 @@ twitter:
   secret: $TWITTER_SECRET
 EOF
 
+# We shouldn't be trying to restart Shelr when it's not installed yet.
+# What's the point of running the service if db-relation hasn't been made
 if [ -f ".installed" ]; then
 	juju-log "Restarting Shelr.tv"
 	# If Shelr isn't running then a restart will just report "Unknown instance"
