@@ -1,1 +1,81 @@
-To be documented
+Introduction
+============
+
+Shelr.tv is a service and a tool for terminal screencasting. This charm will deploy
+the latest Shelr.tv code to provide the web interface found on http://shelr.tv/
+
+Deployment
+==========
+
+    juju deploy mongodb
+    juju deploy shelr.tv
+    juju add-relation shelr.tv mongodb
+    juju expose shelr.tv
+
+Configuration
+=============
+
+Shelr.tv has several additional options for configuration. These are all optional as
+the primary charm will deploy and run without issues; however, if you want to enable
+different log-in provdiers or configure an "admin" see the following options. At any
+time you can run `juju get shelr.tv` to investigate all available options for your
+deployment.
+
+google-id: 
+google-secret:
+  The Google Application ID and Secret which can be obtained by registering your app
+  on Google.
+
+github-id:
+github-secret:
+  The Github Application ID and Secret which can be obtained by registering at 
+  the following URL: https://github.com/settings/applications/new
+
+twitter-id:
+twitter-secret:
+  The Twitter Application ID and Secret which can be obtained by registering at
+  the following URL: https://dev.twitter.com/apps/new
+
+god:
+  This will apply "god" access to the supplied User ID, The user ID can be derived
+  from the User profile URL, eg: http://shelr.tv/users/4f809ab19660802ca6000001 in
+  this example 4f809ab19660802ca6000001 would be the user's ID and would be supplied
+  as the VALUE for this option
+
+
+To set one or more of these configuration options run the following command
+
+    juju set shelr.tv OPTION=VALUE [OPTION=VALUE ...]
+
+Where OPTION is one of the aforementioned configuration options, and VALUE is the
+value you wish to set for that option. You can set as many options as you'd like
+in a single command by continuing to set additional values. An example below:
+
+    juju set shelr.tv google-id=YourGoogleApplicationID google-secret=YourSecretKey god=8675309
+
+Future
+======
+
+The author reports that pure OpenID support will be added soon, which will negate
+the need to use github, twitter, and google settings for login.
+
+Troubleshooting
+===============
+
+ - Browser says: Can not connect to server
+    Make sure you've executed `juju expose shelr.tv`
+
+ - Browser still says: Can not connect to server
+    It can sometimes take several minutes for the WEBrick Ruby Server to start for the
+    first time, if you've recently performed the add-relation command, waiting up to
+    five minutes before reporting a bug is recommended.
+ - Local shelr won't publish to my new site
+    The shelr client was just recently updated to allow for multiple shelr.tv instances
+    as such, run `gem upgrade` to pull the latest version down. Once updated get the API
+    key for your user from the deployed Juju instance and the public-address for the 
+    instance and run the following command:
+    
+        shelr setup [API_KEY] [PUBLIC-ADDRESS]
+    
+    This will setup shelr to push all recordings to your new instance. At this time there
+    is no way to switch hosts on the fly during pushing.
